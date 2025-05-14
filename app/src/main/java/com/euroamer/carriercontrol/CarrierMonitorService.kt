@@ -4,14 +4,14 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyCallback
 import android.content.Context
 import android.os.Build
-import androidx.annotation.RequiresApi
+import android.telephony.PhoneStateListener
 import android.util.Log
+import androidx.lifecycle.LifecycleService
 import kotlinx.coroutines.*
 
-class CarrierMonitorService : Service() {
+class CarrierMonitorService : LifecycleService() {
     private val TAG = "CarrierMonitorService"
     private lateinit var telephonyManager: TelephonyManager
     private val job = SupervisorJob()
@@ -48,9 +48,10 @@ class CarrierMonitorService : Service() {
         "240"  // Sweden
     )
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private val telephonyCallback = object : TelephonyCallback(), TelephonyCallback.CarrierNetworkCallback {
-        override fun onCarrierNetworkChange(active: Boolean) {
+    @Suppress("DEPRECATION")
+    private val phoneStateListener = object : PhoneStateListener() {
+        override fun onDataConnectionStateChanged(state: Int) {
+            super.onDataConnectionStateChanged(state)
             handleCarrierChange()
         }
     }
@@ -58,14 +59,8 @@ class CarrierMonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            telephonyManager.registerTelephonyCallback(
-                context.getMainExecutor(),
-                telephonyCallback
-            )
-        }
-        
+        @Suppress("DEPRECATION")
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE)
         startMonitoring()
     }
 
@@ -94,26 +89,23 @@ class CarrierMonitorService : Service() {
     }
 
     private fun blockNonEuCarrier() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                // Attempt to force the device to use only EU carriers
-                telephonyManager.setPreferredNetworkTypeBitmask(
-                    TelephonyManager.NETWORK_TYPE_BITMASK_LTE or
-                    TelephonyManager.NETWORK_TYPE_BITMASK_NR
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to block non-EU carrier", e)
-            }
+        try {
+            // On modern Android versions, we can't directly block carriers
+            // Instead, we'll notify the user and suggest manual carrier selection
+            val intent = Intent(Intent.ACTION_MAIN)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.setClassName("com.android.phone", "com.android.phone.NetworkSetting")
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open carrier selection", e)
         }
     }
 
-    override fun onBind(intent: Intent): IBinder? = null
-
     override fun onDestroy() {
         super.onDestroy()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            telephonyManager.unregisterTelephonyCallback(telephonyCallback)
-        }
+        @Suppress("DEPRECATION")
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
         job.cancel()
     }
 } 
