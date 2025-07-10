@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -50,9 +50,18 @@
                 android:layout_height="wrap_content"
                 android:text="Current Carrier: Unknown"
                 android:textSize="16sp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/euStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="16dp"/>
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/checkCarrierButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,6 +70,6 @@
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout> 

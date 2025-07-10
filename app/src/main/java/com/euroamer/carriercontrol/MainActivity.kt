@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serviceSwitch: Switch
     private lateinit var statusText: TextView
     private lateinit var currentCarrierText: TextView
+    private lateinit var euStatusText: TextView
     private lateinit var checkCarrierButton: Button
 
     private val requiredPermissions = arrayOf(
@@ -31,15 +32,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        try {
+            setContentView(R.layout.activity_main)
 
-        serviceSwitch = findViewById(R.id.serviceSwitch)
-        statusText = findViewById(R.id.statusText)
-        currentCarrierText = findViewById(R.id.currentCarrierText)
-        checkCarrierButton = findViewById(R.id.checkCarrierButton)
+            serviceSwitch = findViewById(R.id.serviceSwitch)
+            statusText = findViewById(R.id.statusText)
+            currentCarrierText = findViewById(R.id.currentCarrierText)
+            euStatusText = findViewById(R.id.euStatusText)
+            checkCarrierButton = findViewById(R.id.checkCarrierButton)
 
-        setupUI()
-        checkPermissions()
+            setupUI()
+            checkPermissions()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error starting app: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 
     private fun setupUI() {
@@ -81,8 +88,22 @@ class MainActivity : AppCompatActivity() {
             val networkOperator = telephonyManager.networkOperator
             val mcc = if (networkOperator.length >= 3) networkOperator.substring(0, 3) else "Unknown"
             currentCarrierText.text = "Current Carrier: $operatorName\nMCC: $mcc"
+            
+            // Check if it's an EU carrier
+            val euMobileCodes = setOf(
+                "232", "206", "284", "219", "280", "230", "238", "248", "244", "208", "262", "202", "216", "272", "222", "247", "246", "270", "278", "204", "260", "268", "226", "231", "293", "214", "240"
+            )
+            
+            if (euMobileCodes.contains(mcc)) {
+                euStatusText.text = "You are connected to an EU Carrier"
+                euStatusText.setTextColor(android.graphics.Color.GREEN)
+            } else {
+                euStatusText.text = "You are not connected to an EU Carrier"
+                euStatusText.setTextColor(android.graphics.Color.RED)
+            }
         } catch (e: Exception) {
             currentCarrierText.text = "Current Carrier: Unknown"
+            euStatusText.text = ""
         }
     }
 

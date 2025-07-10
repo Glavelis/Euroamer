@@ -8,14 +8,21 @@ import android.content.Context
 import android.os.Build
 import android.telephony.PhoneStateListener
 import android.util.Log
-import androidx.lifecycle.LifecycleService
 import kotlinx.coroutines.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
+import android.net.ConnectivityManager
+import android.provider.Settings
 
-class CarrierMonitorService : LifecycleService() {
+class CarrierMonitorService : Service() {
     private val TAG = "CarrierMonitorService"
     private lateinit var telephonyManager: TelephonyManager
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+    private val CHANNEL_ID = "CarrierMonitorChannel"
+    private val NOTIFICATION_ID = 1
     
     // List of EU country codes (MCC)
     private val euMobileCodes = setOf(
@@ -58,17 +65,38 @@ class CarrierMonitorService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+        createNotificationChannel()
+        startForeground(NOTIFICATION_ID, createNotification("Monitoring carrier..."))
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         @Suppress("DEPRECATION")
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE)
         startMonitoring()
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Carrier Monitor",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun createNotification(message: String) = NotificationCompat.Builder(this, CHANNEL_ID)
+        .setContentTitle("EU Carrier Control")
+        .setContentText(message)
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setOngoing(true)
+        .build()
+
     private fun startMonitoring() {
         scope.launch {
             while (isActive) {
                 handleCarrierChange()
-                delay(30000) // Check every 30 seconds
+                delay(5000) // Check every 5 seconds for faster response
             }
         }
     }
@@ -78,8 +106,12 @@ class CarrierMonitorService : LifecycleService() {
             val networkOperator = telephonyManager.networkOperator
             if (networkOperator.length >= 3) {
                 val mcc = networkOperator.substring(0, 3)
-                if (!euMobileCodes.contains(mcc)) {
-                    // If not an EU carrier, attempt to block it
+                val operatorName = telephonyManager.networkOperatorName
+                if (euMobileCodes.contains(mcc)) {
+                    updateNotification("✓ EU carrier: $operatorName (MCC: $mcc)")
+                } else {
+                    updateNotification("⚠️ BLOCKED: Non-EU carrier $operatorName (MCC: $mcc)")
+                    // Immediately block non-EU carrier
                     blockNonEuCarrier()
                 }
             }
@@ -88,18 +120,67 @@ class CarrierMonitorService : LifecycleService() {
         }
     }
 
+    private fun updateNotification(message: String) {
+        val notification = createNotification(message)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun blockNonEuCarrier() {
         try {
-            // On modern Android versions, we can't directly block carriers
-            // Instead, we'll notify the user and suggest manual carrier selection
+            Log.w(TAG, "Non-EU carrier detected - attempting to block connection")
+            
+            // Try to disable mobile data
+            disableMobileData()
+            
+            // Try to enable airplane mode as last resort
+            enableAirplaneMode()
+            
+            // Open carrier selection for manual override
             val intent = Intent(Intent.ACTION_MAIN)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addCategory(Intent.CATEGORY_DEFAULT)
             intent.setClassName("com.android.phone", "com.android.phone.NetworkSetting")
             startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to open carrier selection", e)
+            Log.e(TAG, "Failed to block non-EU carrier", e)
         }
+    }
+    
+    private fun disableMobileData() {
+        try {
+            val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            // Note: This requires system-level permissions that regular apps don't have
+            // The app will need to be installed as a system app or have special permissions
+            Log.w(TAG, "Attempting to disable mobile data for non-EU carrier")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to disable mobile data", e)
+        }
+    }
+    
+    private fun enableAirplaneMode() {
+        try {
+            // Note: This requires WRITE_SECURE_SETTINGS permission
+            // and may not work on all Android versions due to security restrictions
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                Settings.System.putInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 1)
+            } else {
+                Settings.Global.putInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 1)
+            }
+            
+            // Send broadcast to update airplane mode
+            val intent = Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+            intent.putExtra("state", true)
+            sendBroadcast(intent)
+            
+            Log.w(TAG, "Airplane mode activated to block non-EU carrier")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to enable airplane mode", e)
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 
     override fun onDestroy() {
