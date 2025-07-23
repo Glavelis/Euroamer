@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6] - 2025-01-14
+
+### Added
+- 📱 Custom app icon added
+
+### Changed
+- Updated app version to 1.6 (versionCode 7)
+- Replaced default Android icon with custom Euroamer logo
+
 ## [1.5] - 2025-01-14
 
 ### Added

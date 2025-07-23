@@ -16,8 +16,9 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🌎 Current country display based on location
 - 🔍 150-meter default zoom level for precise location view
 - ✨ Improved text visibility with white text on dark background
-- 🌏 **NEW**: Accurate country detection using carrier MCC codes
-- 📍 **NEW**: Fixed country detection for Germany (MCC 262)
+- 🌏 Accurate country detection using carrier MCC codes
+- 📍 Fixed country detection for Germany (MCC 262)
+- 📱 **NEW**: Custom app icon with Euroamer branding
 
 ## Supported EU Countries
 
