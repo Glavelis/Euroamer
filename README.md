@@ -12,8 +12,10 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🗺️ OpenStreetMap integration showing vehicle location
 - 🟢 Green overlay when vehicle is within EU countries
 - 📍 Real-time location tracking with EU boundary detection
-- 🌙 **NEW**: Dark theme for comfortable night usage
-- 🔍 **NEW**: 500-meter default zoom level for better location context
+- 🌙 Dark theme for comfortable night usage
+- 🌎 **NEW**: Current country display based on location
+- 🔍 **NEW**: 150-meter default zoom level for precise location view
+- ✨ **NEW**: Improved text visibility with white text on dark background
 
 ## Supported EU Countries
 

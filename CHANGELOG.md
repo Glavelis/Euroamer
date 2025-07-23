@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4] - 2025-01-14
+
+### Added
+- 🌎 Current country display based on location data
+- ✨ Improved text visibility with white text on dark background
+
+### Changed
+- Updated app version to 1.4 (versionCode 5)
+- Changed default zoom level from 500m to 150m for more precise location view
+- Enhanced UI with better text contrast
+
 ## [1.3] - 2025-01-14
 
 ### Added

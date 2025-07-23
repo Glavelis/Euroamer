@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var statusText: TextView
     private lateinit var currentCarrierText: TextView
     private lateinit var euStatusText: TextView
+    private lateinit var currentCountryText: TextView
     private lateinit var checkCarrierButton: Button
     private lateinit var mapView: MapView
     private lateinit var locationManager: LocationManager
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             statusText = findViewById(R.id.statusText)
             currentCarrierText = findViewById(R.id.currentCarrierText)
             euStatusText = findViewById(R.id.euStatusText)
+            currentCountryText = findViewById(R.id.currentCountryText)
             checkCarrierButton = findViewById(R.id.checkCarrierButton)
             mapView = findViewById(R.id.mapView)
             
@@ -102,7 +104,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun setupMap() {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
-        mapView.controller.setZoom(15.0) // Approximately 500 meters zoom level
+        mapView.controller.setZoom(17.0) // Approximately 150 meters zoom level
         mapView.controller.setCenter(GeoPoint(50.0, 10.0)) // Center on Europe
         
         // Add location overlay
@@ -248,10 +250,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 marker.snippet = "In EU: $country"
                 euStatusText.text = "Location: In EU ($country)"
                 euStatusText.setTextColor(Color.GREEN)
+                currentCountryText.text = "Current Country: $country"
             } else {
                 marker.snippet = "Outside EU"
                 euStatusText.text = "Location: Outside EU"
                 euStatusText.setTextColor(Color.RED)
+                currentCountryText.text = "Current Country: Outside EU"
             }
             
             mapView.overlays.add(marker)
