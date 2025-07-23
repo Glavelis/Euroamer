@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Euroamer" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.Euroamer" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/light_gray</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+    </style>
 </resources>

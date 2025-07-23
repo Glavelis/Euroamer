@@ -9,9 +9,11 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🌍🌍 Comprehensive EU carrier database
 - 📊 Current carrier status display
 - ⚙️ Easy toggle for protection service
-- 🗺️ **NEW**: OpenStreetMap integration showing vehicle location
-- 🟢 **NEW**: Green overlay when vehicle is within EU countries
-- 📍 **NEW**: Real-time location tracking with EU boundary detection
+- 🗺️ OpenStreetMap integration showing vehicle location
+- 🟢 Green overlay when vehicle is within EU countries
+- 📍 Real-time location tracking with EU boundary detection
+- 🌙 **NEW**: Dark theme for comfortable night usage
+- 🔍 **NEW**: 500-meter default zoom level for better location context
 
 ## Supported EU Countries
 

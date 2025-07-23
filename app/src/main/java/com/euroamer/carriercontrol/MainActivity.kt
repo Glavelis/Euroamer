@@ -23,6 +23,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun setupMap() {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
-        mapView.controller.setZoom(6.0)
+        mapView.controller.setZoom(15.0) // Approximately 500 meters zoom level
         mapView.controller.setCenter(GeoPoint(50.0, 10.0)) // Center on Europe
         
         // Add location overlay
@@ -111,6 +112,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         
         // Add EU boundary overlays
         mapOverlayManager.addEUBoundaryOverlays()
+        
+        // Set night mode for map
+        mapView.overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
     }
 
     private fun startCarrierService() {

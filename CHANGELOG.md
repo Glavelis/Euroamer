@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3] - 2025-01-14
+
+### Added
+- 🌙 Dark theme for comfortable night usage
+- 🔍 500-meter default zoom level for better location context
+
+### Changed
+- Updated app version to 1.3 (versionCode 4)
+- Improved UI with dark background and card styling
+- Enhanced map readability with night mode tiles
+
 ## [1.2] - 2025-01-14
 
 ### Added
