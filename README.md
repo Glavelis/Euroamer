@@ -1,3 +1,5 @@
+![Euroamer Banner](Graphics/euroamer_banner.png)
+
 # EU Carrier Control
 
 An Android application designed to help travelers maintain connectivity exclusively with EU carriers while traveling through different countries. This app helps prevent unexpected roaming charges by automatically managing carrier connections.
