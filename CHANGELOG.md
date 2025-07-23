@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5] - 2025-01-14
+
+### Added
+- 🌏 Accurate country detection using carrier MCC codes
+- 📍 Fixed country detection for Germany (MCC 262)
+
+### Changed
+- Updated app version to 1.5 (versionCode 6)
+- Improved country detection accuracy by prioritizing carrier MCC over GPS location
+- Added MCCCountryMapper utility class for reliable country mapping
+
 ## [1.4] - 2025-01-14
 
 ### Added

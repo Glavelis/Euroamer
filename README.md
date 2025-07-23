@@ -13,9 +13,11 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🟢 Green overlay when vehicle is within EU countries
 - 📍 Real-time location tracking with EU boundary detection
 - 🌙 Dark theme for comfortable night usage
-- 🌎 **NEW**: Current country display based on location
-- 🔍 **NEW**: 150-meter default zoom level for precise location view
-- ✨ **NEW**: Improved text visibility with white text on dark background
+- 🌎 Current country display based on location
+- 🔍 150-meter default zoom level for precise location view
+- ✨ Improved text visibility with white text on dark background
+- 🌏 **NEW**: Accurate country detection using carrier MCC codes
+- 📍 **NEW**: Fixed country detection for Germany (MCC 262)
 
 ## Supported EU Countries
 

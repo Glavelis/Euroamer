@@ -26,6 +26,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import com.euroamer.carriercontrol.MCCCountryMapper
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val PERMISSIONS_REQUEST_CODE = 123
@@ -138,14 +139,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             val operatorName = telephonyManager.networkOperatorName
             val networkOperator = telephonyManager.networkOperator
             val mcc = if (networkOperator.length >= 3) networkOperator.substring(0, 3) else "Unknown"
+            val country = MCCCountryMapper.getCountryFromMCC(mcc) ?: "Unknown"
             currentCarrierText.text = "Current Carrier: $operatorName\nMCC: $mcc"
+            currentCountryText.text = "Current Country: $country"
             
-            // Check if it's an EU carrier
-            val euMobileCodes = setOf(
-                "232", "206", "284", "219", "280", "230", "238", "248", "244", "208", "262", "202", "216", "272", "222", "247", "246", "270", "278", "204", "260", "268", "226", "231", "293", "214", "240"
-            )
-            
-            if (euMobileCodes.contains(mcc)) {
+            if (MCCCountryMapper.isEUCountry(mcc)) {
                 euStatusText.text = "You are connected to an EU Carrier"
                 euStatusText.setTextColor(android.graphics.Color.GREEN)
             } else {
@@ -243,9 +241,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             marker.title = "Current Location"
             
-            // Check if in EU and update marker color
-            val (isInEU, country) = euBoundaryChecker.isLocationInEU(geoPoint)
-            if (isInEU) {
+            // Get country from carrier MCC code first (more accurate)
+            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val networkOperator = telephonyManager.networkOperator
+            val mcc = if (networkOperator.length >= 3) networkOperator.substring(0, 3) else null
+            val countryFromMCC = mcc?.let { MCCCountryMapper.getCountryFromMCC(it) }
+            
+            // Check if in EU based on location as fallback
+            val (isInEU, countryFromLocation) = euBoundaryChecker.isLocationInEU(geoPoint)
+            
+            // Prioritize MCC-based country detection over location-based
+            val country = countryFromMCC ?: countryFromLocation
+            val isInEUCountry = mcc?.let { MCCCountryMapper.isEUCountry(it) } ?: isInEU
+            
+            if (isInEUCountry && country != null) {
                 marker.icon = resources.getDrawable(android.R.drawable.ic_menu_mylocation, theme)
                 marker.snippet = "In EU: $country"
                 euStatusText.text = "Location: In EU ($country)"
