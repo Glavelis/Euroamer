@@ -20,7 +20,10 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - ✨ Improved text visibility with white text on dark background
 - 🌏 Accurate country detection using carrier MCC codes
 - 📍 Fixed country detection for Germany (MCC 262)
-- 📱 **NEW**: Custom app icon with Euroamer branding
+- 📱 Custom app icon with Euroamer branding
+- 🎯 **NEW**: Auto-centering map that follows current position
+- 🧭 **NEW**: Marker orientation based on movement direction
+- 🚗 **NEW**: Real-time speed display in km/h
 
 ## Supported EU Countries
 

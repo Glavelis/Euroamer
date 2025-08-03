@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var currentCarrierText: TextView
     private lateinit var euStatusText: TextView
     private lateinit var currentCountryText: TextView
+    private lateinit var speedText: TextView
     private lateinit var checkCarrierButton: Button
     private lateinit var mapView: MapView
     private lateinit var locationManager: LocationManager
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             currentCarrierText = findViewById(R.id.currentCarrierText)
             euStatusText = findViewById(R.id.euStatusText)
             currentCountryText = findViewById(R.id.currentCountryText)
+            speedText = findViewById(R.id.speedText)
             checkCarrierButton = findViewById(R.id.checkCarrierButton)
             mapView = findViewById(R.id.mapView)
             
@@ -228,18 +230,31 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onLocationChanged(location: Location) {
         val geoPoint = GeoPoint(location.latitude, location.longitude)
         
-        // Update map center
-        mapView.controller.animateTo(geoPoint)
+        // Keep map centered on current position
+        mapView.controller.setCenter(geoPoint)
+        
+        // Update speed display
+        val speed = if (location.hasSpeed()) {
+            (location.speed * 3.6).toInt() // Convert m/s to km/h
+        } else {
+            0
+        }
+        speedText.text = "Speed: $speed km/h"
         
         // Remove previous marker
         currentLocationMarker?.let { mapView.overlays.remove(it) }
         
-        // Add new location marker
+        // Add new location marker with orientation
         currentLocationMarker = Marker(mapView)
         currentLocationMarker?.let { marker ->
             marker.position = geoPoint
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             marker.title = "Current Location"
+            
+            // Set marker rotation based on bearing if available
+            if (location.hasBearing()) {
+                marker.rotation = location.bearing
+            }
             
             // Get country from carrier MCC code first (more accurate)
             val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
@@ -256,12 +271,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
             
             if (isInEUCountry && country != null) {
                 marker.icon = resources.getDrawable(android.R.drawable.ic_menu_mylocation, theme)
-                marker.snippet = "In EU: $country"
+                marker.snippet = "In EU: $country - Speed: $speed km/h"
                 euStatusText.text = "Location: In EU ($country)"
                 euStatusText.setTextColor(Color.GREEN)
                 currentCountryText.text = "Current Country: $country"
             } else {
-                marker.snippet = "Outside EU"
+                marker.snippet = "Outside EU - Speed: $speed km/h"
                 euStatusText.text = "Location: Outside EU"
                 euStatusText.setTextColor(Color.RED)
                 currentCountryText.text = "Current Country: Outside EU"

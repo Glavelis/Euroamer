@@ -76,6 +76,15 @@
                 android:text="Current Country: Unknown"
                 android:textSize="16sp"
                 android:textColor="@color/white"
+                android:layout_marginBottom="8dp"/>
+                
+            <TextView
+                android:id="@+id/speedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed: 0 km/h"
+                android:textSize="16sp"
+                android:textColor="@color/white"
                 android:layout_marginBottom="16dp"/>
 
             <Button

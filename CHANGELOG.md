@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7] - 2025-01-14
+
+### Added
+- 🎯 Auto-centering map that follows current position
+- 🧭 Marker orientation based on movement direction
+- 🚗 Real-time speed display in km/h
+
+### Changed
+- Updated app version to 1.7 (versionCode 8)
+- Map now keeps current position centered at all times
+- Marker rotates to show movement direction
+- Speed information displayed in UI and marker tooltip
+
 ## [1.6] - 2025-01-14
 
 ### Added
