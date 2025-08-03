@@ -85,7 +85,42 @@
                 android:text="Speed: 0 km/h"
                 android:textSize="16sp"
                 android:textColor="@color/white"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="8dp"/>
+                
+            <Switch
+                android:id="@+id/trackingSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enable Route Tracking"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:layout_marginBottom="8dp"/>
+                
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                
+                <Button
+                    android:id="@+id/manageTracksButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Manage Tracks"
+                    android:textColor="@color/white"
+                    android:layout_marginEnd="4dp"/>
+                    
+                <Button
+                    android:id="@+id/openTrackButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Open Track"
+                    android:textColor="@color/white"
+                    android:layout_marginStart="4dp"/>
+                    
+            </LinearLayout>
 
             <Button
                 android:id="@+id/checkCarrierButton"

@@ -21,9 +21,12 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🌏 Accurate country detection using carrier MCC codes
 - 📍 Fixed country detection for Germany (MCC 262)
 - 📱 Custom app icon with Euroamer branding
-- 🎯 **NEW**: Auto-centering map that follows current position
-- 🧭 **NEW**: Marker orientation based on movement direction
-- 🚗 **NEW**: Real-time speed display in km/h
+- 🎯 Auto-centering map that follows current position
+- 🧭 Marker orientation based on movement direction
+- 🚗 Real-time speed display in km/h
+- 📍 **NEW**: Route tracking with GPX export
+- 📁 **NEW**: Track management and file operations
+- 🗺️ **NEW**: Display saved tracks on map
 
 ## Supported EU Countries
 

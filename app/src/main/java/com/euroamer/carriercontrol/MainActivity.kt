@@ -27,6 +27,9 @@ import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import com.euroamer.carriercontrol.MCCCountryMapper
+import org.osmdroid.views.overlay.Polyline
+import android.app.AlertDialog
+import java.io.File
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val PERMISSIONS_REQUEST_CODE = 123
@@ -36,6 +39,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var euStatusText: TextView
     private lateinit var currentCountryText: TextView
     private lateinit var speedText: TextView
+    private lateinit var trackingSwitch: android.widget.Switch
+    private lateinit var manageTracksButton: Button
+    private lateinit var openTrackButton: Button
+    private lateinit var trackingManager: TrackingManager
     private lateinit var checkCarrierButton: Button
     private lateinit var mapView: MapView
     private lateinit var locationManager: LocationManager
@@ -67,7 +74,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
             euStatusText = findViewById(R.id.euStatusText)
             currentCountryText = findViewById(R.id.currentCountryText)
             speedText = findViewById(R.id.speedText)
+            trackingSwitch = findViewById(R.id.trackingSwitch)
+            manageTracksButton = findViewById(R.id.manageTracksButton)
+            openTrackButton = findViewById(R.id.openTrackButton)
             checkCarrierButton = findViewById(R.id.checkCarrierButton)
+            
+            trackingManager = TrackingManager(this)
             mapView = findViewById(R.id.mapView)
             
             euBoundaryChecker = EUBoundaryChecker()
@@ -101,6 +113,29 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         checkCarrierButton.setOnClickListener {
             updateCarrierInfo()
+        }
+        
+        trackingSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // Start tracking - will begin with next location update
+                Toast.makeText(this, "Route tracking started", Toast.LENGTH_SHORT).show()
+            } else {
+                // Stop tracking and export GPX
+                val gpxPath = trackingManager.stopTracking()
+                if (gpxPath != null) {
+                    Toast.makeText(this, "Track saved: $gpxPath", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Route tracking stopped", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        
+        manageTracksButton.setOnClickListener {
+            showTrackManagementDialog()
+        }
+        
+        openTrackButton.setOnClickListener {
+            showTrackSelectionDialog()
         }
     }
     
@@ -241,6 +276,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
         speedText.text = "Speed: $speed km/h"
         
+        // Handle tracking
+        if (trackingSwitch.isChecked && !trackingManager.isCurrentlyTracking()) {
+            trackingManager.startTracking(location)
+        } else if (trackingSwitch.isChecked && trackingManager.isCurrentlyTracking()) {
+            trackingManager.addTrackPoint(location)
+        }
+        
         // Remove previous marker
         currentLocationMarker?.let { mapView.overlays.remove(it) }
         
@@ -303,8 +345,108 @@ class MainActivity : AppCompatActivity(), LocationListener {
         stopLocationUpdates()
     }
     
+    private fun showTrackManagementDialog() {
+        val trackingDir = trackingManager.getTrackingDirectory()
+        if (!trackingDir.exists() || trackingDir.listFiles()?.isEmpty() == true) {
+            Toast.makeText(this, "No tracks found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val gpxFiles = trackingDir.listFiles { file -> file.extension == "gpx" } ?: emptyArray()
+        val fileNames = gpxFiles.map { it.name }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Manage Tracks")
+            .setItems(fileNames) { _, which ->
+                val selectedFile = gpxFiles[which]
+                showTrackOptionsDialog(selectedFile)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showTrackOptionsDialog(file: File) {
+        AlertDialog.Builder(this)
+            .setTitle(file.name)
+            .setItems(arrayOf("View on Map", "Delete")) { _, which ->
+                when (which) {
+                    0 -> displayTrackOnMap(file)
+                    1 -> deleteTrackFile(file)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showTrackSelectionDialog() {
+        val trackingDir = trackingManager.getTrackingDirectory()
+        if (!trackingDir.exists() || trackingDir.listFiles()?.isEmpty() == true) {
+            Toast.makeText(this, "No tracks found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val gpxFiles = trackingDir.listFiles { file -> file.extension == "gpx" } ?: emptyArray()
+        val fileNames = gpxFiles.map { it.name }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Open Track")
+            .setItems(fileNames) { _, which ->
+                displayTrackOnMap(gpxFiles[which])
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun displayTrackOnMap(file: File) {
+        val parser = GPXParser()
+        val track = parser.parseGPXFile(file)
+        
+        if (track == null) {
+            Toast.makeText(this, "Failed to parse GPX file", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Clear existing track overlays
+        mapView.overlays.removeAll { it is Polyline }
+        
+        // Create polyline for the track
+        val polyline = Polyline()
+        polyline.setPoints(track.points)
+        polyline.color = android.graphics.Color.BLUE
+        polyline.width = 5f
+        
+        mapView.overlays.add(polyline)
+        
+        // Zoom to track bounds
+        if (track.points.isNotEmpty()) {
+            val boundingBox = org.osmdroid.util.BoundingBox.fromGeoPoints(track.points)
+            mapView.zoomToBoundingBox(boundingBox, true, 50)
+        }
+        
+        mapView.invalidate()
+        Toast.makeText(this, "Track loaded: ${track.name}", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun deleteTrackFile(file: File) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Track")
+            .setMessage("Are you sure you want to delete ${file.name}?")
+            .setPositiveButton("Delete") { _, _ ->
+                if (file.delete()) {
+                    Toast.makeText(this, "Track deleted", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Failed to delete track", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
         stopLocationUpdates()
+        if (trackingManager.isCurrentlyTracking()) {
+            trackingManager.stopTracking()
+        }
     }
 } 

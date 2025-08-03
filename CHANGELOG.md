@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8] - 2025-01-14
+
+### Added
+- 📍 Route tracking functionality with enable/disable switch
+- 📁 GPX file export with speed data to Tracking folder
+- 🗺️ Track management system (view, delete tracks)
+- 📱 Open and display saved GPX tracks on map
+- 📅 Automatic filename generation with location and timestamp
+
+### Changed
+- Updated app version to 1.8 (versionCode 9)
+- Enhanced UI with tracking controls
+- Added track visualization with polylines
+
 ## [1.7] - 2025-01-14
 
 ### Added
