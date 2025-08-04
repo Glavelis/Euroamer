@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
         
         manageTracksButton.setOnClickListener {
-            showTrackManagementDialog()
+            openFileManager()
         }
         
         openTrackButton.setOnClickListener {
@@ -445,6 +445,29 @@ class MainActivity : AppCompatActivity(), LocationListener {
         
         mapView.invalidate()
         Toast.makeText(this, "Track loaded: ${track.name}", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun openFileManager() {
+        val trackingDir = trackingManager.getTrackingDirectory()
+        if (!trackingDir.exists()) {
+            trackingDir.mkdirs()
+        }
+        
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(Uri.fromFile(trackingDir), "resource/folder")
+            if (intent.resolveActivityInfo(packageManager, 0) != null) {
+                startActivity(intent)
+            } else {
+                // Fallback to generic file manager
+                val fallbackIntent = Intent(Intent.ACTION_GET_CONTENT)
+                fallbackIntent.type = "*/*"
+                fallbackIntent.addCategory(Intent.CATEGORY_OPENABLE)
+                startActivity(Intent.createChooser(fallbackIntent, "Open File Manager"))
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "No file manager found", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun openGPXInBrowser(file: File) {
