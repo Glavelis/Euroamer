@@ -31,6 +31,7 @@ import org.osmdroid.views.overlay.Polyline
 import android.app.AlertDialog
 import java.io.File
 import android.net.Uri
+import androidx.core.content.FileProvider
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val PERMISSIONS_REQUEST_CODE = 123
@@ -455,18 +456,26 @@ class MainActivity : AppCompatActivity(), LocationListener {
         
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.setDataAndType(Uri.fromFile(trackingDir), "resource/folder")
-            if (intent.resolveActivityInfo(packageManager, 0) != null) {
+            intent.setDataAndType(Uri.parse(trackingDir.absolutePath), "resource/folder")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            
+            if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                // Fallback to generic file manager
-                val fallbackIntent = Intent(Intent.ACTION_GET_CONTENT)
-                fallbackIntent.type = "*/*"
-                fallbackIntent.addCategory(Intent.CATEGORY_OPENABLE)
-                startActivity(Intent.createChooser(fallbackIntent, "Open File Manager"))
+                // Try alternative approach with file:// URI
+                val fileIntent = Intent(Intent.ACTION_VIEW)
+                fileIntent.setDataAndType(Uri.parse("file://" + trackingDir.absolutePath), "*/*")
+                fileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                
+                if (fileIntent.resolveActivity(packageManager) != null) {
+                    startActivity(fileIntent)
+                } else {
+                    // Show path to user
+                    Toast.makeText(this, "Tracking folder: ${trackingDir.absolutePath}", Toast.LENGTH_LONG).show()
+                }
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "No file manager found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Tracking folder: ${trackingDir.absolutePath}", Toast.LENGTH_LONG).show()
         }
     }
     
