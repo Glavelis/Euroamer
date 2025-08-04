@@ -30,6 +30,7 @@ import com.euroamer.carriercontrol.MCCCountryMapper
 import org.osmdroid.views.overlay.Polyline
 import android.app.AlertDialog
 import java.io.File
+import android.net.Uri
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private val PERMISSIONS_REQUEST_CODE = 123
@@ -135,7 +136,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
         
         openTrackButton.setOnClickListener {
-            showTrackSelectionDialog()
+            showTrackSelectionForWebDialog()
         }
     }
     
@@ -378,6 +379,25 @@ class MainActivity : AppCompatActivity(), LocationListener {
             .show()
     }
     
+    private fun showTrackSelectionForWebDialog() {
+        val trackingDir = trackingManager.getTrackingDirectory()
+        if (!trackingDir.exists() || trackingDir.listFiles()?.isEmpty() == true) {
+            Toast.makeText(this, "No tracks found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val gpxFiles = trackingDir.listFiles { file -> file.extension == "gpx" } ?: emptyArray()
+        val fileNames = gpxFiles.map { it.name }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Open Track in Browser")
+            .setItems(fileNames) { _, which ->
+                openGPXInBrowser(gpxFiles[which])
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     private fun showTrackSelectionDialog() {
         val trackingDir = trackingManager.getTrackingDirectory()
         if (!trackingDir.exists() || trackingDir.listFiles()?.isEmpty() == true) {
@@ -425,6 +445,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
         
         mapView.invalidate()
         Toast.makeText(this, "Track loaded: ${track.name}", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun openGPXInBrowser(file: File) {
+        try {
+            val gpxUrl = "https://www.gpsvisualizer.com/map_input?form=google&allow_export=1&units=metric&add_elevation=1&gc_segments=1&gc_altitude=1&gc_speed=1&add_speed=1&format=google&file=${Uri.encode(file.absolutePath)}"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(gpxUrl))
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Fallback to OpenStreetMap GPX viewer
+            val osmUrl = "https://www.openstreetmap.org/traces/new"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(osmUrl))
+            startActivity(intent)
+            Toast.makeText(this, "Please upload your GPX file manually", Toast.LENGTH_LONG).show()
+        }
     }
     
     private fun deleteTrackFile(file: File) {

@@ -24,9 +24,11 @@ An Android application designed to help travelers maintain connectivity exclusiv
 - 🎯 Auto-centering map that follows current position
 - 🧭 Marker orientation based on movement direction
 - 🚗 Real-time speed display in km/h
-- 📍 **NEW**: Route tracking with GPX export
-- 📁 **NEW**: Track management and file operations
-- 🗺️ **NEW**: Display saved tracks on map
+- 📍 Route tracking with GPX export
+- 📁 Track management and file operations
+- 🗺️ Display saved tracks on map
+- 🌐 **NEW**: Open GPX tracks in web browser
+- 📂 **NEW**: Multiple GPX file storage support
 
 ## Supported EU Countries
 

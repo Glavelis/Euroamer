@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9] - 2025-01-14
+
+### Added
+- 🌐 Open GPX tracks in web browser functionality
+- 📂 Support for multiple GPX file storage
+
+### Changed
+- Updated app version to 1.9 (versionCode 10)
+- Button text color changed to black for better visibility
+- Open Track button now opens GPX files in web browser
+- Enhanced track management with web viewing option
+
 ## [1.8] - 2025-01-14
 
 ### Added
